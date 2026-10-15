@@ -1,0 +1,49 @@
+package pages
+
+import (
+	"workshop/internal/domain/sighting"
+	"workshop/web/views/components"
+	"workshop/web/views/layout"
+)
+
+templ Sighting(s sighting.Sighting, nearby []sighting.Sighting) {
+	@layout.Base(layout.BaseProps{
+		Title: s.Species.VernacularName + " sighting | Wildroot",
+		Description: "A wildlife sighting from " + s.Location.Country + ".",
+	}) {
+		<section class="section">
+			<p class="eyebrow eyebrow--dark"><a href="/">← All sightings</a></p>
+			<h1>{ s.Species.VernacularName }</h1>
+			if s.Species.ScientificName != "" {
+				<p class="entry__scientific">{ s.Species.ScientificName }</p>
+			}
+			<div class="detail-grid">
+				<div>
+					@components.SightingCard(s)
+				</div>
+				<aside class="panel">
+					<h2>On the day</h2>
+					@components.Weather(s.Weather)
+					<p>{ s.Location.Locality }{ ", " + s.Location.Country }</p>
+					if s.Location.Latitude != 0 || s.Location.Longitude != 0 {
+						@components.Map(components.MapProps{
+							Points: []components.MapPoint{{Lat: s.Location.Latitude, Lng: s.Location.Longitude, Title: s.Species.VernacularName, Place: s.Location.Locality + ", " + s.Location.Country}},
+							Label: "Map showing where this sighting was recorded.",
+							Class: "map--framed",
+						})
+					}
+				</aside>
+			</div>
+			if len(nearby) > 0 {
+				<section class="section">
+					<h2>More sightings from { s.Location.Country }</h2>
+					<ul class="timeline__entries">
+						for _, other := range nearby {
+							<li><a href={ templ.SafeURL("/sightings/" + other.ID.String()) }><strong>{ other.Species.VernacularName }</strong> · { other.HappenedAt.Format("2 Jan 2006") }</a></li>
+						}
+					</ul>
+				</section>
+			}
+		</section>
+	}
+}

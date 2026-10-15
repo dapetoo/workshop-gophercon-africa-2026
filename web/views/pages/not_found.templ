@@ -1,0 +1,25 @@
+package pages
+
+import (
+	"workshop/internal/domain/sighting"
+	"workshop/web/views/components"
+	"workshop/web/views/layout"
+)
+
+templ NotFound(recent []sighting.Sighting) {
+	@layout.Base(layout.BaseProps{
+		Title: "Trail not found | Wildroot",
+		Description: "That wildlife sighting could not be found.",
+	}) {
+		<section class="section error">
+			<p class="eyebrow eyebrow--dark">404 · Lost trail</p>
+			<h1>We couldn’t find that sighting.</h1>
+			<p>The page may have moved. Here are a few recent observations to follow instead.</p>
+			<a class="button button--forest" href="/">Back to all sightings</a>
+			if len(recent) > 0 {
+				<div class="section__head"><h2>Recent sightings</h2></div>
+				@components.Timeline(recent)
+			}
+		</section>
+	}
+}
