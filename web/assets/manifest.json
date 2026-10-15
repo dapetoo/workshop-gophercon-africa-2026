@@ -1,0 +1,8 @@
+{
+	"name": "Wildroot: wildlife sightings",
+	"short_name": "Wildroot",
+	"icons": [{ "src": "/assets/images/logo.svg", "sizes": "any", "type": "image/svg+xml" }],
+	"theme_color": "#F6F3EA",
+	"background_color": "#F6F3EA",
+	"display": "standalone"
+}

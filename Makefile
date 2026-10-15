@@ -96,6 +96,10 @@ sqlc: # Regenerate sqlc output.
 	go build ./...
 .PHONY: sqlc
 
+sqlc-verify: # Verify SQL queries against schema changes with sqlc Cloud.
+	go tool sqlc verify
+.PHONY: sqlc-verify
+
 vendor: # Re-vendor after go get, here and in tools/gopls.
 	go mod tidy
 	go mod vendor

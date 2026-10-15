@@ -1,0 +1,85 @@
+package components
+
+import (
+	"strconv"
+	"workshop/internal/domain/sighting"
+)
+
+templ Timeline(sightings []sighting.Sighting) {
+	<ol class="timeline">
+		for _, group := range ByYear(sightings) {
+			<li class="timeline__year">
+				<h3 class="timeline__label">
+					<span>{ strconv.Itoa(group.Year) }</span>
+					<small>{ seenTimes(len(group.Sightings)) }</small>
+				</h3>
+				<ol class="timeline__entries">
+					for _, s := range group.Sightings {
+						<li>
+							@TimelineEntry(s)
+						</li>
+					}
+				</ol>
+			</li>
+		}
+	</ol>
+}
+
+templ TimelineEntry(s sighting.Sighting) {
+	<article class="entry" id={ Anchor(s) }>
+		<div class="entry__photo">
+			if m, ok := photo(s.Media); ok {
+				<img src={ m.URL } alt={ altText(m) } loading="lazy"/>
+				if extra := len(s.Media) - 1; extra > 0 {
+					<span class="entry__more">{ morePhotos(extra) }</span>
+				}
+			} else {
+				<span class="entry__nophoto">No photo</span>
+			}
+		</div>
+		<div class="entry__body">
+			<p class="entry__date">
+				<time datetime={ s.HappenedAt.Format("2006-01-02") }>{ s.HappenedAt.Format("2 January 2006") }</time>
+			</p>
+			<h4 class="entry__name">{ displayName(s.Species) }</h4>
+			if s.Species.ScientificName != "" {
+				<p class="entry__scientific">{ s.Species.ScientificName }</p>
+			}
+			<dl class="entry__meta">
+				<div>
+					<dt>Where</dt>
+					<dd>{ place(s.Location) }</dd>
+				</div>
+				if s.IndividualCount != nil {
+					<div>
+						<dt>Count</dt>
+						<dd>{ individuals(*s.IndividualCount) }</dd>
+					</div>
+				}
+				<div>
+					<dt>Seen by</dt>
+					<dd>{ cmpOr(s.RecordedBy, "Not recorded") }</dd>
+				</div>
+				<div class="entry__weather">
+					<dt>Weather</dt>
+					<dd>
+						@Weather(s.Weather)
+					</dd>
+				</div>
+			</dl>
+		</div>
+	</article>
+}
+
+templ HeroPhoto(s sighting.Sighting) {
+	if m, ok := photo(s.Media); ok {
+		<figure class="hero-photo">
+			<img src={ m.URL } alt={ altText(m) } loading="lazy"/>
+			<figcaption>
+				<span class="hero-photo__tag">Latest sighting</span>
+				<strong>{ displayName(s.Species) }</strong>
+				<span>{ place(s.Location) }, { s.HappenedAt.Format("2 Jan 2006") }</span>
+			</figcaption>
+		</figure>
+	}
+}
