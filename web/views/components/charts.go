@@ -68,3 +68,35 @@ func bar(count, longest int) map[string]string {
 	}
 	return map[string]string{"--bar": strconv.Itoa(count*100/longest) + "%"}
 }
+
+// recentYears lists the last span years up to the latest sighting.
+func recentYears(sum sighting.Summary, span int) []int {
+	last := sum.Latest.Year()
+	first := max(sum.Earliest.Year(), last-span+1)
+	ys := make([]int, 0, last-first+1)
+	for y := first; y <= last; y++ {
+		ys = append(ys, y)
+	}
+	return ys
+}
+
+// peakIn finds the busiest of the given years and its count.
+func peakIn(byYear map[int]int, ys []int) (year, count int) {
+	for _, y := range ys {
+		if byYear[y] > count {
+			year, count = y, byYear[y]
+		}
+	}
+	return year, count
+}
+
+// columnsLabel says in words what the columns show.
+func columnsLabel(byYear map[int]int, ys []int) string {
+	y, n := peakIn(byYear, ys)
+	return fmt.Sprintf("Sightings per year, %d to %d, most in %d with %d", ys[0], ys[len(ys)-1], y, n)
+}
+
+// shortYear renders a year as '19.
+func shortYear(y int) string {
+	return fmt.Sprintf("’%02d", y%100)
+}

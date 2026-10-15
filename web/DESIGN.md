@@ -29,23 +29,34 @@ uppercase labels at 700 with 0.08em tracking.
 
 ## Shape and spacing
 
-- Radii: `--radius-lg` 32px (banner, map), `--radius` 20px (cards, panels), `--radius-sm` 12px
+- Radii: `--radius-lg` 32px (banner, map), `--radius` 22px (cards, panels), `--radius-sm` 14px
   (photos, bars), `--pill` for buttons, nav and chips.
-- Content width 1200px; side padding `--space` (16–32px); sections 56–104px apart.
-- One soft shadow, `--shadow`, on cards, panels, nav and map.
+- Content width 1240px (banner 1360px); side padding `--space` (16–40px); sections 64–112px apart.
+- `--shadow` on cards, panels, nav and map; `--shadow-lift` on hover and the numbers strip.
 
 ## Components
 
-- **Header**: sticky, blurred cream; leaf logo and wordmark "Wildroot"; nav in a white pill; lime
-  "Explore" button (hidden on phones).
-- **Banner**: forest rounded panel; spinning 3D globe behind it with a lime dot per sighting
-  (`assets/js/scenes/globe.js`); a tilted glassy card with the latest photographed sighting.
-- **Numbers**: four stat tiles (the first forest-filled), a sparkline of sightings per year and
-  bar lists for top animals and countries.
+- **Header**: sticky, blurred cream; leaf logo and wordmark "Wildroot"; nav (Animals, Map,
+  Timeline) in a white pill; lime "Explore" button (hidden on phones).
+- **Banner**: a full-width wildlife photo (a big cat when there is one) under a forest fade from
+  the left and bottom; huge cream headline with "real place" in lime; lime and outline pill
+  buttons; a glassy "latest" chip top right with a pulsing lime dot.
+- **Numbers strip**: a white rounded bar overlapping the banner's bottom edge, four big figures
+  split by thin lines.
+- **Meet the regulars**: photo tiles of the five most-seen animals, the first twice the size;
+  lime count chip, name over a dark fade, a round arrow that turns lime on hover.
+- **Globe panel**: forest rounded panel; three.js globe with cream land, moss sea, lime dots per
+  sighting and a lime rim glow (`assets/js/scenes/globe.js`); top countries as bars beside it.
+- **Trends**: lime columns for the last twelve years, the latest in forest; bars for top animals.
 - **Map**: Leaflet, clustered, forest markers with lime outline, framed in a paper border.
-- **Timeline**: years down the left (sticky), a line with lime dots, one card per sighting with a
-  4:3 photo, date in soil brown, name, scientific name, place, count, observers and weather.
+- **Timeline**: years down the left (sticky) on a line with lime dots; cards three across with a
+  4:3 photo, a date chip on it, name, Latin name, place, observer and a cream weather box. Nine
+  per year, the rest behind a "Show N more" pill.
+- **Closing banner**: forest panel, a photo fading in from the right, "Seen something wild?".
+- **Footer**: deep forest, brand blurb and two link columns with lime headings.
 - **Error page**: a big forest status code and a forest button home.
+
+Photos from iNaturalist are requested at "medium" (cards) or "large" (banners), not the originals.
 
 ## Avoid
 

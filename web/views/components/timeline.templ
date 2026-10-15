@@ -11,15 +11,29 @@ templ Timeline(sightings []sighting.Sighting) {
 			<li class="timeline__year">
 				<h3 class="timeline__label">
 					<span>{ strconv.Itoa(group.Year) }</span>
-					<small>{ seenTimes(len(group.Sightings)) }</small>
+					<small>{ plural(len(group.Shown)+len(group.More), "sighting") }</small>
 				</h3>
-				<ol class="timeline__entries">
-					for _, s := range group.Sightings {
-						<li>
-							@TimelineEntry(s)
-						</li>
+				<div class="timeline__body">
+					<ul class="timeline__entries">
+						for _, s := range group.Shown {
+							<li>
+								@TimelineEntry(s)
+							</li>
+						}
+					</ul>
+					if len(group.More) > 0 {
+						<details class="timeline__more">
+							<summary>{ "Show " + strconv.Itoa(len(group.More)) + " more from " + strconv.Itoa(group.Year) }</summary>
+							<ul class="timeline__entries">
+								for _, s := range group.More {
+									<li>
+										@TimelineEntry(s)
+									</li>
+								}
+							</ul>
+						</details>
 					}
-				</ol>
+				</div>
 			</li>
 		}
 	</ol>
@@ -29,26 +43,28 @@ templ TimelineEntry(s sighting.Sighting) {
 	<article class="entry" id={ Anchor(s) }>
 		<div class="entry__photo">
 			if m, ok := photo(s.Media); ok {
-				<img src={ m.URL } alt={ altText(m) } loading="lazy"/>
+				<img src={ sized(m.URL, "medium") } alt={ altText(m) } loading="lazy" decoding="async"/>
 				if extra := len(s.Media) - 1; extra > 0 {
-					<span class="entry__more">{ morePhotos(extra) }</span>
+					<span class="entry__more">{ "+" + plural(extra, "photo") }</span>
 				}
 			} else {
 				<span class="entry__nophoto">No photo</span>
 			}
+			<time class="entry__date" datetime={ s.HappenedAt.Format("2006-01-02") }>{ s.HappenedAt.Format("2 Jan 2006") }</time>
 		</div>
 		<div class="entry__body">
-			<p class="entry__date">
-				<time datetime={ s.HappenedAt.Format("2006-01-02") }>{ s.HappenedAt.Format("2 January 2006") }</time>
-			</p>
 			<h4 class="entry__name">{ displayName(s.Species) }</h4>
 			if s.Species.ScientificName != "" {
-				<p class="entry__scientific">{ s.Species.ScientificName }</p>
+				<p class="entry__scientific">{ cmpOr(s.Species.CanonicalName, s.Species.ScientificName) }</p>
 			}
+			<p class="entry__place">
+				<svg class="icon" aria-hidden="true" viewBox="0 0 24 24"><path d="M12 21s-7-6.2-7-11a7 7 0 0 1 14 0c0 4.8-7 11-7 11z"></path><circle cx="12" cy="10" r="2.5"></circle></svg>
+				{ place(s.Location) }
+			</p>
 			<dl class="entry__meta">
 				<div>
-					<dt>Where</dt>
-					<dd>{ place(s.Location) }</dd>
+					<dt>Seen by</dt>
+					<dd>{ cmpOr(s.RecordedBy, "Not recorded") }</dd>
 				</div>
 				if s.IndividualCount != nil {
 					<div>
@@ -56,30 +72,51 @@ templ TimelineEntry(s sighting.Sighting) {
 						<dd>{ individuals(*s.IndividualCount) }</dd>
 					</div>
 				}
-				<div>
-					<dt>Seen by</dt>
-					<dd>{ cmpOr(s.RecordedBy, "Not recorded") }</dd>
-				</div>
-				<div class="entry__weather">
-					<dt>Weather</dt>
-					<dd>
-						@Weather(s.Weather)
-					</dd>
-				</div>
 			</dl>
+			<div class="entry__weather">
+				@Weather(s.Weather)
+			</div>
 		</div>
 	</article>
 }
 
 templ HeroPhoto(s sighting.Sighting) {
 	if m, ok := photo(s.Media); ok {
-		<figure class="hero-photo">
-			<img src={ m.URL } alt={ altText(m) } loading="lazy"/>
-			<figcaption>
-				<span class="hero-photo__tag">Latest sighting</span>
-				<strong>{ displayName(s.Species) }</strong>
-				<span>{ place(s.Location) }, { s.HappenedAt.Format("2 Jan 2006") }</span>
-			</figcaption>
-		</figure>
+		<img class="hero__photo" src={ sized(m.URL, "large") } alt={ altText(m) } fetchpriority="high"/>
 	}
+}
+
+templ HeroCaption(s sighting.Sighting) {
+	<a class="hero__caption" href={ templ.SafeURL("#" + Anchor(s)) }>
+		<span class="hero__caption-dot" aria-hidden="true"></span>
+		<span>
+			<strong>{ displayName(s.Species) }</strong>
+			<span>{ place(s.Location) }, { s.HappenedAt.Format("Jan 2006") }</span>
+		</span>
+	</a>
+}
+
+templ RegularCards(rows []Regular) {
+	<ul class="regulars">
+		for i, r := range rows {
+			<li class={ "regular", templ.KV("regular--wide", i == 0) }>
+				<a class="regular__link" href={ templ.SafeURL("#" + Anchor(r.Sighting)) }>
+					if m, ok := photo(r.Sighting.Media); ok {
+						<img src={ sized(m.URL, "medium") } alt={ altText(m) } loading="lazy" decoding="async"/>
+					}
+					<span class="regular__shade" aria-hidden="true"></span>
+					<span class="regular__count">{ plural(r.Count, "sighting") }</span>
+					<span class="regular__text">
+						<strong>{ r.Name }</strong>
+						if r.Sighting.Species.CanonicalName != "" {
+							<em>{ r.Sighting.Species.CanonicalName }</em>
+						}
+					</span>
+					<span class="regular__arrow" aria-hidden="true">
+						<svg viewBox="0 0 24 24"><path d="M7 17 17 7M8 7h9v9"></path></svg>
+					</span>
+				</a>
+			</li>
+		}
+	</ul>
 }

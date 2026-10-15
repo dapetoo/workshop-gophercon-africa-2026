@@ -15,21 +15,28 @@ templ Home(sightings []sighting.Sighting) {
 		Description: "Wildlife sightings from around the world, on a map and a timeline.",
 	}) {
 		<section class="hero" aria-labelledby="hero-title">
-			@components.ThreeScene(components.ThreeSceneProps{Scene: "globe", Backdrop: true})
-			@templ.JSONScript("globe-points", components.GlobePoints(sightings))
+			{{ hero, hasHero := components.Hero(sightings) }}
+			if hasHero {
+				@components.HeroPhoto(hero)
+			}
+			<div class="hero__shade" aria-hidden="true"></div>
 			<div class="hero__content">
-				<p class="eyebrow">Wildlife, seen and shared</p>
-				<h1 id="hero-title">Every sighting, rooted in a real place.</h1>
+				<p class="eyebrow">
+					<span class="eyebrow__dot" aria-hidden="true"></span>
+					Wildlife, seen and shared
+				</p>
+				<h1 id="hero-title">Every sighting, rooted in a <em>real place</em>.</h1>
 				<p class="hero__lead">Field records from people out watching lions, whales, turtles and macaws, with the weather on the day they were seen.</p>
 				<div class="hero__actions">
-					<a class="button button--lime" href="#sightings">Explore the timeline</a>
+					<a class="button button--lime" href="#sightings">
+						Explore the timeline
+						<svg class="icon" aria-hidden="true" viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"></path></svg>
+					</a>
 					<a class="button button--ghost" href="#map">See the map</a>
 				</div>
 			</div>
-			if latest, ok := components.Latest(sightings); ok {
-				<a class="hero__latest" href={ templ.SafeURL("#" + components.Anchor(latest)) }>
-					@components.HeroPhoto(latest)
-				</a>
+			if hasHero {
+				@components.HeroCaption(hero)
 			}
 		</section>
 		if len(sightings) == 0 {
@@ -38,48 +45,74 @@ templ Home(sightings []sighting.Sighting) {
 				<p>Nothing has been recorded so far. Run <code>go run . db seed</code> to add some.</p>
 			</section>
 		} else {
-			<section class="section numbers" id="numbers" aria-labelledby="numbers-title">
-				<div class="section__head">
-					<p class="eyebrow eyebrow--dark">The numbers</p>
-					<h2 id="numbers-title">A living record of the wild</h2>
+			<div class="statbar" id="numbers">
+				<div class="statbar__item">
+					<span class="statbar__value">{ strconv.Itoa(sum.Sightings) }</span>
+					<span class="statbar__label">Sightings recorded</span>
 				</div>
-				<div class="numbers__grid">
-					<div class="stat">
-						<span class="stat__value">{ strconv.Itoa(sum.Sightings) }</span>
-						<span class="stat__label">sightings</span>
+				<div class="statbar__item">
+					<span class="statbar__value">{ strconv.Itoa(sum.Species) }</span>
+					<span class="statbar__label">Species seen</span>
+				</div>
+				<div class="statbar__item">
+					<span class="statbar__value">{ strconv.Itoa(sum.Countries) }</span>
+					<span class="statbar__label">Countries</span>
+				</div>
+				<div class="statbar__item">
+					<span class="statbar__value">{ strconv.Itoa(sum.Recorders) }</span>
+					<span class="statbar__label">Observers in the field</span>
+				</div>
+			</div>
+			<section class="section" id="regulars" aria-labelledby="regulars-title">
+				<div class="section__head section__head--split">
+					<div>
+						<p class="eyebrow eyebrow--dark">Meet the regulars</p>
+						<h2 id="regulars-title">The animals people see most</h2>
 					</div>
-					<div class="stat">
-						<span class="stat__value">{ strconv.Itoa(sum.Species) }</span>
-						<span class="stat__label">species</span>
+					<p>From blue whales off Antarctica to macaws in Costa Rica: the species that turn up again and again in the records.</p>
+				</div>
+				@components.RegularCards(components.Regulars(sightings, 5))
+			</section>
+			<section class="section">
+				<div class="globe-panel" aria-labelledby="globe-title">
+					<div class="globe-panel__scene">
+						@components.ThreeScene(components.ThreeSceneProps{Scene: "globe", Label: "A turning globe with a dot for every sighting"})
+						@templ.JSONScript("globe-points", components.GlobePoints(sightings))
 					</div>
-					<div class="stat">
-						<span class="stat__value">{ strconv.Itoa(sum.Countries) }</span>
-						<span class="stat__label">countries</span>
-					</div>
-					<div class="stat">
-						<span class="stat__value">{ strconv.Itoa(sum.Recorders) }</span>
-						<span class="stat__label">observers</span>
-					</div>
-					<div class="panel panel--spark">
-						<h3>Sightings per year</h3>
-						<p class="panel__note">{ strconv.Itoa(sum.Earliest.Year()) } to { strconv.Itoa(sum.Latest.Year()) }</p>
-						@components.Sparkline(byYear, sum)
-					</div>
-					<div class="panel">
-						<h3>Most-seen animals</h3>
-						@components.Bars(components.TopAnimals(sightings, 5))
-					</div>
-					<div class="panel">
-						<h3>Busiest countries</h3>
+					<div class="globe-panel__text">
+						<p class="eyebrow">Around the world</p>
+						<h2 id="globe-title">{ strconv.Itoa(sum.Countries) } countries, one living record</h2>
+						<p>Each lime dot is an animal someone stopped to watch. These are the places that keep turning up.</p>
 						@components.Bars(topCountries(sightings, 5))
 					</div>
 				</div>
 			</section>
+			<section class="section" aria-labelledby="trends-title">
+				<div class="section__head section__head--split">
+					<div>
+						<p class="eyebrow eyebrow--dark">The numbers</p>
+						<h2 id="trends-title">Sightings, year on year</h2>
+					</div>
+					<p>Records go back to { strconv.Itoa(sum.Earliest.Year()) }, but most are recent. Here are the last twelve years, and the animals seen most.</p>
+				</div>
+				<div class="trends">
+					<div class="panel panel--columns">
+						<h3>Sightings per year</h3>
+						@components.YearColumns(byYear, sum, 12)
+					</div>
+					<div class="panel">
+						<h3>Most-seen animals</h3>
+						@components.Bars(components.TopAnimals(sightings, 6))
+					</div>
+				</div>
+			</section>
 			<section class="section" id="map" aria-labelledby="map-title">
-				<div class="section__head">
-					<p class="eyebrow eyebrow--dark">Where</p>
-					<h2 id="map-title">Seen across the globe</h2>
-					<p>Zoom in to break up the groups. Click a dot to jump to its sighting below.</p>
+				<div class="section__head section__head--split">
+					<div>
+						<p class="eyebrow eyebrow--dark">Where</p>
+						<h2 id="map-title">Every sighting, on the map</h2>
+					</div>
+					<p>Zoom in to break up the groups. Click a dot to jump to its sighting in the timeline.</p>
 				</div>
 				@components.Map(components.MapProps{
 					Points:  components.MapPoints(sightings),
@@ -89,12 +122,26 @@ templ Home(sightings []sighting.Sighting) {
 				})
 			</section>
 			<section class="section" id="sightings" aria-labelledby="sightings-title">
-				<div class="section__head">
-					<p class="eyebrow eyebrow--dark">When</p>
-					<h2 id="sightings-title">The timeline</h2>
-					<p>Newest first, year by year.</p>
+				<div class="section__head section__head--split">
+					<div>
+						<p class="eyebrow eyebrow--dark">When</p>
+						<h2 id="sightings-title">The timeline</h2>
+					</div>
+					<p>Newest first, year by year, with who saw each animal and the weather that day.</p>
 				</div>
 				@components.Timeline(sightings)
+			</section>
+			<section class="section">
+				<div class="cta">
+					if reg := components.Regulars(sightings, 7); len(reg) > 6 {
+						@components.HeroPhoto(reg[6].Sighting)
+					}
+					<div class="cta__text">
+						<h2>Seen something wild?</h2>
+						<p>Every record here started with someone noticing an animal and writing it down. Add yours, and it could appear on this page.</p>
+						<a class="button button--lime" href="https://www.inaturalist.org" rel="noopener">Record a sighting</a>
+					</div>
+				</div>
 			</section>
 		}
 	}

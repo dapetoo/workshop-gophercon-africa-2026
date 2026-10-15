@@ -1,6 +1,9 @@
 package components
 
-import "workshop/internal/domain/sighting"
+import (
+	"strconv"
+	"workshop/internal/domain/sighting"
+)
 
 templ Sparkline(byYear map[int]int, sum sighting.Summary) {
 	if sum.Sightings > 0 {
@@ -18,6 +21,22 @@ templ Bars(rows []sighting.Tally) {
 				<li class="bars__row" style={ bar(row.Count, rows[0].Count) }>
 					<span class="bars__name">{ row.Name }</span>
 					<span class="bars__count">{ row.Count }</span>
+				</li>
+			}
+		</ol>
+	}
+}
+
+templ YearColumns(byYear map[int]int, sum sighting.Summary, span int) {
+	if sum.Sightings > 0 {
+		{{ ys := recentYears(sum, span) }}
+		{{ _, high := peakIn(byYear, ys) }}
+		<ol class="columns" aria-label={ columnsLabel(byYear, ys) }>
+			for _, y := range ys {
+				<li class="columns__col" style={ bar(byYear[y], high) }>
+					<span class="columns__count">{ strconv.Itoa(byYear[y]) }</span>
+					<span class="columns__bar" aria-hidden="true"></span>
+					<span class="columns__year">{ shortYear(y) }</span>
 				</li>
 			}
 		</ol>

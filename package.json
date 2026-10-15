@@ -1,0 +1,21 @@
+{
+  "name": "workshop-gophercon-africa-2026",
+  "version": "1.0.0",
+  "description": "**About the author:** Ainsley Clark, Go Developer Advocate @ JetBrains",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/dapetoo/workshop-gophercon-africa-2026.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/dapetoo/workshop-gophercon-africa-2026/issues"
+  },
+  "homepage": "https://github.com/dapetoo/workshop-gophercon-africa-2026#readme"
+}

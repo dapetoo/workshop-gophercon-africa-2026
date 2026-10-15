@@ -162,7 +162,10 @@ func SightingCard(s sighting.Sighting) templ.Component {
 // displayName prefers the name a reader would recognise, falling back
 // through the taxonomy as GBIF records thin out.
 func displayName(sp species.Species) string {
-	return cmp.Or(sp.VernacularName, sp.CanonicalName, sp.ScientificName, "Unknown species")
+	if sp.VernacularName != "" {
+		return title(sp.VernacularName)
+	}
+	return cmp.Or(sp.CanonicalName, sp.ScientificName, "Unknown species")
 }
 
 // place joins whichever parts of the location GBIF supplied.
